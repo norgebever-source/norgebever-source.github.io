@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "de.maxbiber.svingen",
+      "sha256_cert_fingerprints": [
+        "ED:A3:1E:F2:66:12:7F:85:15:27:42:D7:DA:99:DE:9D:9E:CD:63:50:52:87:52:A0:87:10:CA:AB:E1:6D:BA:08",
+        "64:02:D7:ED:D0:DB:DF:A8:94:6B:C1:F3:D3:44:EF:8F:A8:7B:61:6D:18:25:14:7F:6A:C6:AB:E8:8C:FF:FB:FC"
+      ]
+    }
+  }
+]
