@@ -1,4 +1,4 @@
-const CACHE = "svingen-v2";
+const CACHE = "svingen-v3";
 const PRECACHE = ["/", "/datenschutz", "/manifest.webmanifest", "/favicon.svg", "/elk.wav", "/icon-192.png", "/icon-512.png", "/icon-maskable-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -24,6 +24,7 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith("/svingen-sperrungen/")) return;
   if (url.pathname.startsWith("/@") || url.pathname.startsWith("/src/") || url.pathname.startsWith("/node_modules")) return;
 
   if (request.mode === "navigate") {
