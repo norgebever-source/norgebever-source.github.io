@@ -1,4 +1,4 @@
-const CACHE = "svingen-v5";
+const CACHE = "svingen-v6";
 const PRECACHE = ["/", "/datenschutz", "/manifest.webmanifest", "/favicon.svg", "/elk.wav", "/icon-192.png", "/icon-512.png", "/icon-maskable-512.png"];
 
 self.addEventListener("install", (event) => {
