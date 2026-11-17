@@ -1,10 +1,10 @@
 // Svingen · Live-Sperrungen (Oberfläche)
 import { n as __toESM } from "./rolldown-runtime-CbXtAM7H.js";
-import { a as __jsx, o as __react } from "./index-5317eb27.js";
+import { a as __jsx, o as __react } from "./index-82ee1512.js";
 import {
   store, subscribe, getVersion, readUnlock, tryUnlock, lock, setShowMap, setVehicle, start, refresh,
   getPrepared, checkPath, checkPosition, severity, titleOf, untilText, labelOf, restrictionText,
-} from "./sperr-store-2c45c0e2.js";
+} from "./sperr-store-bc30305d.js";
 
 const R = __toESM(__react(), 1);
 const J = __jsx();
@@ -140,7 +140,9 @@ export function Hinweis() {
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState(false);
   function hide() { try { localStorage.setItem(HINT_KEY, "1"); } catch (e) {} setOff(true); }
-  if (done) return hs("section", { className: "flex flex-col gap-2 rounded-card border border-line bg-spruce-soft p-4 text-spruce shadow-card", "aria-live": "polite", children: [
+  // Nach "ausschalten" wieder den normalen Hinweis zeigen, nicht die alte Erfolgsmeldung
+  useEffect(() => { if (!store.unlocked && done) setDone(false); }, [store.unlocked, done]);
+  if (done && store.unlocked) return hs("section", { className: "flex flex-col gap-2 rounded-card border border-line bg-spruce-soft p-4 text-spruce shadow-card", "aria-live": "polite", children: [
     h("p", { className: "font-medium", children: "Live-Sperrungen sind freigeschaltet." }),
     h("p", { className: "text-sm", children: "Die aktuellen Meldungen stehen über der Karte. Ausschalten kannst du sie unter Einstellungen." }),
     h("button", { type: "button", className: "min-h-11 rounded-2xl border border-line bg-bg px-3 text-ink", onClick: () => setDone(false), children: "OK" }),

@@ -31,13 +31,15 @@ export async function tryUnlock(code) {
     const h = await sha256hex("svingen-live:" + normCode(code));
     if (h !== CODE_HASH) return false;
     try { localStorage.setItem(UNLOCK_KEY, "1"); } catch (e) {}
-    store.unlocked = true; emit(); start();
+    // Vorhandene Daten sofort neu aufbereiten: start() lädt innerhalb von 2 Minuten nicht neu,
+    // sonst bliebe die Liste nach "ausschalten" + erneutem Freischalten leer.
+    store.unlocked = true; rebuild(); emit(); start();
     return true;
   } catch (e) { return false; }
 }
 export function lock() {
   try { localStorage.removeItem(UNLOCK_KEY); } catch (e) {}
-  store.unlocked = false; store.items = []; store.mapItems = []; stop(); emit();
+  store.unlocked = false; rebuild(); stop(); emit();
 }
 export function setShowMap(b) {
   store.showMap = !!b;
