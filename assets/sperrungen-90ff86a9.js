@@ -1,6 +1,6 @@
 // Svingen · Live-Sperrungen (Oberfläche)
 import { n as __toESM } from "./rolldown-runtime-CbXtAM7H.js";
-import { a as __jsx, o as __react } from "./index-ebbe152c.js";
+import { a as __jsx, o as __react } from "./index-5317eb27.js";
 import {
   store, subscribe, getVersion, readUnlock, tryUnlock, lock, setShowMap, setVehicle, start, refresh,
   getPrepared, checkPath, checkPosition, severity, titleOf, untilText, labelOf, restrictionText,
@@ -111,9 +111,9 @@ export function Sperrungen({ route, position, prev, vehicle, roads }) {
   });
 }
 
-export function Freischaltung() {
-  useStore();
-  useEffect(() => { readUnlock(); }, []);
+const HINT_KEY = "svingen-live-hint-off";
+
+function CodeForm({ autoFocus, onOk }) {
   const [code, setCode] = useState("");
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -122,23 +122,64 @@ export function Freischaltung() {
     setBusy(true); setErr(null);
     const ok = await tryUnlock(code);
     setBusy(false);
-    if (!ok) setErr("Der Code stimmt nicht."); else setCode("");
+    if (!ok) setErr("Der Code stimmt nicht. Bitte prüfen und noch einmal eingeben.");
+    else { setCode(""); if (onOk) onOk(); }
   }
+  return hs("form", { className: "flex flex-col gap-2", onSubmit: go, children: [
+    h("input", { className: "min-h-11 rounded-2xl border border-line bg-surface px-3", type: "password", placeholder: "Freischaltcode", value: code, autoFocus: !!autoFocus, autoComplete: "off", autoCapitalize: "characters", spellCheck: false, onChange: (e) => { setCode(e.target.value); setErr(null); }, "aria-label": "Freischaltcode" }),
+    err ? h("p", { className: "text-sm text-stop", role: "alert", children: err }) : null,
+    h("button", { type: "submit", disabled: busy || code.trim().length < 4, className: "min-h-11 rounded-2xl bg-spruce px-3 text-bg disabled:opacity-50", children: busy ? "Wird geprüft …" : "Freischalten" }),
+  ] });
+}
+
+// Hinweis oben auf der Seite für alle ohne Freischaltcode (ausblendbar)
+export function Hinweis() {
+  useStore();
+  useEffect(() => { readUnlock(); }, []);
+  const [off, setOff] = useState(() => { try { return localStorage.getItem(HINT_KEY) === "1"; } catch (e) { return false; } });
+  const [open, setOpen] = useState(false);
+  const [done, setDone] = useState(false);
+  function hide() { try { localStorage.setItem(HINT_KEY, "1"); } catch (e) {} setOff(true); }
+  if (done) return hs("section", { className: "flex flex-col gap-2 rounded-card border border-line bg-spruce-soft p-4 text-spruce shadow-card", "aria-live": "polite", children: [
+    h("p", { className: "font-medium", children: "Live-Sperrungen sind freigeschaltet." }),
+    h("p", { className: "text-sm", children: "Die aktuellen Meldungen stehen über der Karte. Ausschalten kannst du sie unter Einstellungen." }),
+    h("button", { type: "button", className: "min-h-11 rounded-2xl border border-line bg-bg px-3 text-ink", onClick: () => setDone(false), children: "OK" }),
+  ] });
+  if (store.unlocked || off) return null;
+  return hs("section", { className: "flex flex-col gap-3 rounded-card border border-line bg-amber-soft p-4 shadow-card", "aria-label": "Hinweis Live-Sperrungen", children: [
+    hs("div", { className: "flex items-start justify-between gap-3", children: [
+      hs("div", { className: "flex flex-col gap-1", children: [
+        h("p", { className: "font-medium text-ink", children: "Neu: Live-Sperrungen (Statens vegvesen) verfügbar – mit Freischaltcode freischalten" }),
+        h("p", { className: "text-sm text-muted", children: "Gesperrte Straßen, Wintersperren und Gewichtsgrenzen, alle 15 Minuten aktuell. Svingen prüft damit deine Route und deinen Standort." }),
+      ] }),
+      h("button", { type: "button", className: "flex size-10 shrink-0 items-center justify-center rounded-full text-2xl leading-none text-muted", onClick: hide, "aria-label": "Hinweis ausblenden", title: "Hinweis ausblenden", children: "×" }),
+    ] }),
+    open
+      ? h(CodeForm, { autoFocus: true, onOk: () => setDone(true) })
+      : h("button", { type: "button", className: "min-h-11 rounded-2xl bg-spruce px-3 text-bg", onClick: () => setOpen(true), children: "Live-Sperrungen freischalten" }),
+  ] });
+}
+
+export function Freischaltung() {
+  useStore();
+  useEffect(() => { readUnlock(); }, []);
   return hs("section", {
+    id: "freischaltung",
     className: "flex flex-col gap-2",
     children: [
       h("h2", { className: "font-display text-2xl", children: "Einstellungen" }),
-      store.unlocked
-        ? hs("div", { className: "flex flex-col gap-2", children: [
-            h("p", { className: "text-sm", children: "Live-Sperrungen sind freigeschaltet." }),
-            h("button", { type: "button", className: "min-h-11 rounded-2xl border border-line bg-bg px-3", onClick: () => lock(), children: "Live-Sperrungen ausschalten" }),
-          ] })
-        : hs("form", { className: "flex flex-col gap-2", onSubmit: go, children: [
-            h("p", { className: "text-sm text-muted", children: "Live-Sperrungen (Beta) sind per Freischaltcode verfügbar." }),
-            h("input", { className: "min-h-11 rounded-2xl border border-line bg-surface px-3", placeholder: "Freischaltcode", value: code, autoComplete: "off", autoCapitalize: "characters", spellCheck: false, onChange: (e) => setCode(e.target.value), "aria-label": "Freischaltcode" }),
-            err ? h("p", { className: "text-sm text-stop", children: err }) : null,
-            h("button", { type: "submit", disabled: busy || code.trim().length < 4, className: "min-h-11 rounded-2xl bg-spruce px-3 text-bg disabled:opacity-50", children: "Freischalten" }),
-          ] }),
+      hs("div", { className: "flex flex-col gap-2 rounded-card border border-line bg-surface p-4 shadow-card", children: [
+        h("h3", { className: "font-medium", children: "Live-Sperrungen freischalten" }),
+        store.unlocked
+          ? hs("div", { className: "flex flex-col gap-2", children: [
+              h("p", { className: "text-sm", children: "Live-Sperrungen sind freigeschaltet." }),
+              h("button", { type: "button", className: "min-h-11 rounded-2xl border border-line bg-bg px-3", onClick: () => lock(), children: "Live-Sperrungen ausschalten" }),
+            ] })
+          : hs("div", { className: "flex flex-col gap-2", children: [
+              h("p", { className: "text-sm text-muted", children: "Aktuelle Sperrungen von Statens vegvesen (Beta) sind mit einem Freischaltcode verfügbar." }),
+              h(CodeForm, {}),
+            ] }),
+      ] }),
     ],
   });
 }
